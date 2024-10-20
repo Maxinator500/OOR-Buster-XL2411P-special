@@ -4,36 +4,33 @@
 #include <lowlevelmonitorconfigurationapi.h>
 #include <string>
 #include <Tlhelp32.h>
-
 #include "resource.h"
 
-const BYTE VCP_OSD_LANGUAGE = 0xCC;
-const BYTE VCP_PICTURE_MODE = 0xDC;
-const BYTE VCP_AMA = 0xF0;
+const BYTE VCP_SPECIFIC_ONE = 0xEF;	//Manufacturer specific OpCode
+const BYTE VCP_OVERSCAN_MODE = 0xDA;//Overscan setting OpCode
 
 enum
 {
-	WM_APP_RELOAD = WM_APP + 1,
-	WM_APP_EXIT,
+	WM_APP_RELOAD = WM_APP + 1,	//WM_APP_RELOAD refreshes cached OpCode values
 	WM_APP_NEXT_MODE,
-	WM_APP_PREV_MODE
+	WM_APP_PREV_MODE,
+	WM_APP_REMOVE_OOR_MSG,
+	WM_APP_EXIT
 };
 
-DWORD CachedOsdLanguage = 2;
-DWORD CachedPictureMode = 0;
-DWORD CachedAma = 1;
+DWORD PreferredSpecific = 0;	//Unknown (default)
+DWORD PreferredOverscanMode = 0;//Normal (default)
 
-DWORD OorDelay = 2000;
+DWORD OorDelay = 2000;	//Values for delays if not specified by args
 DWORD PicDelay = 500;
-DWORD AmaDelay = 250;
 DWORD WakeDelay = 3000;
 
 NOTIFYICONDATA TrayIcon;
-HANDLE Monitor;
+HANDLE MonitorHandle;
 
 int GetRefreshRate()
 {
-	DEVMODE dm;
+	DEVMODE dm{};
 	dm.dmSize = sizeof(DEVMODE);
 	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm);
 
@@ -56,14 +53,13 @@ HANDLE GetPhysicalMonitor()
 
 void CachePhysicalMonitor()
 {
-	Monitor = GetPhysicalMonitor();
+	MonitorHandle = GetPhysicalMonitor();
 }
 
 void CacheVcpValues()
 {
-	GetVCPFeatureAndVCPFeatureReply(Monitor, VCP_OSD_LANGUAGE, NULL, &CachedOsdLanguage, NULL);
-	GetVCPFeatureAndVCPFeatureReply(Monitor, VCP_PICTURE_MODE, NULL, &CachedPictureMode, NULL);
-	GetVCPFeatureAndVCPFeatureReply(Monitor, VCP_AMA, NULL, &CachedAma, NULL);
+	GetVCPFeatureAndVCPFeatureReply(MonitorHandle, VCP_SPECIFIC_ONE, NULL, &PreferredSpecific, NULL);
+	GetVCPFeatureAndVCPFeatureReply(MonitorHandle, VCP_OVERSCAN_MODE, NULL, &PreferredOverscanMode, NULL);
 }
 
 void ReadLaunchParams()
@@ -73,30 +69,36 @@ void ReadLaunchParams()
 
 	if (args && argCount > 1)
 	{
-		OorDelay = (DWORD)wcstod(args[1], L'\0');
-		PicDelay = (DWORD)wcstod(args[2], L'\0');
-		AmaDelay = (DWORD)wcstod(args[3], L'\0');
-		WakeDelay = (DWORD)wcstod(args[4], L'\0');
+		OorDelay = (DWORD)wcstod(args[1], 0);
+		PicDelay = (DWORD)wcstod(args[2], 0);
+		WakeDelay = (DWORD)wcstod(args[3], 0);
 	}
 }
 
-inline void FixOor() {SetVCPFeature(Monitor, VCP_OSD_LANGUAGE, CachedOsdLanguage);}
-inline void FixPic() {SetVCPFeature(Monitor, VCP_PICTURE_MODE, CachedPictureMode);}
-inline void FixAma() {SetVCPFeature(Monitor, VCP_AMA, CachedAma);}
+inline void FixOor() {SetVCPFeature(MonitorHandle, VCP_SPECIFIC_ONE, PreferredSpecific);}	//Removes "Out of Range" error from screen
+inline void FixPic() {SetVCPFeature(MonitorHandle, VCP_OVERSCAN_MODE, PreferredOverscanMode);}	//Fixes black screen
 
-void NextMode()
+void AttemptFixOor()
 {
 	CachePhysicalMonitor();
 	CacheVcpValues();
-	CachedPictureMode++;
+	PreferredSpecific++;
+	FixOor();
+}
+
+void NextOverscanMode()
+{
+	CachePhysicalMonitor();
+	CacheVcpValues();
+	PreferredOverscanMode++;
 	FixPic();
 }
 
-void PrevMode()
+void PrevOverscanMode()
 {
 	CachePhysicalMonitor();
 	CacheVcpValues();
-	CachedPictureMode--;
+	PreferredOverscanMode--;
 	FixPic();
 }
 
@@ -110,7 +112,6 @@ void ApplyVcpValues(bool wake = false)
 
 	Sleep(OorDelay); FixOor();
 	Sleep(PicDelay); FixPic();
-	Sleep(AmaDelay); FixAma();
 }
 
 void ShowTrayMenu(HWND wnd)
@@ -119,9 +120,13 @@ void ShowTrayMenu(HWND wnd)
 	GetCursorPos(&pos);
 
 	HMENU menu = CreatePopupMenu();
-	InsertMenu(menu, -1, MF_BYPOSITION, WM_APP_RELOAD, L"Reload");
-	InsertMenu(menu, -1, MF_BYPOSITION, WM_APP_NEXT_MODE, L"Next Mode");
-	InsertMenu(menu, -1, MF_BYPOSITION, WM_APP_PREV_MODE, L"Prev Mode");
+	InsertMenu(menu, -1, MF_BYPOSITION, WM_APP_RELOAD, L"Reload OOR Buster");
+	InsertMenu(menu, -1, MF_BYPOSITION | MF_SEPARATOR, 0, 0);
+	InsertMenu(menu, -1, MF_BYPOSITION | MF_STRING | MF_DISABLED, 0, L"Test:");
+	InsertMenu(menu, -1, MF_BYPOSITION, WM_APP_NEXT_MODE, L"Next Overscan Mode");
+	InsertMenu(menu, -1, MF_BYPOSITION, WM_APP_PREV_MODE, L"Prev Overscan Mode");
+	InsertMenu(menu, -1, MF_BYPOSITION, WM_APP_REMOVE_OOR_MSG, L"Remove OOR Message");
+	InsertMenu(menu, -1, MF_BYPOSITION | MF_SEPARATOR, 0, 0);
 	InsertMenu(menu, -1, MF_BYPOSITION, WM_APP_EXIT, L"Exit");
 	SetForegroundWindow(wnd);
 	TrackPopupMenu(menu, TPM_BOTTOMALIGN, pos.x, pos.y, 0, wnd, NULL);
@@ -174,10 +179,13 @@ LRESULT CALLBACK WindowProc(_In_ HWND wnd, _In_ UINT msg, _In_ WPARAM wParam, _I
 
 			break;
 		case WM_APP_NEXT_MODE:
-			NextMode();
+			NextOverscanMode();
 			break;
 		case WM_APP_PREV_MODE:
-			PrevMode();
+			PrevOverscanMode();
+			break;
+		case WM_APP_REMOVE_OOR_MSG:
+			AttemptFixOor();
 			break;
 		case WM_APP_EXIT:
 			Shell_NotifyIcon(NIM_DELETE, &TrayIcon);
@@ -252,7 +260,7 @@ void KillOtherInstances()
 
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPALL, NULL);
 
-	PROCESSENTRY32 entry; 
+	PROCESSENTRY32 entry{}; 
 	entry.dwSize = sizeof(entry);
 
 	for (BOOL res = Process32First(snapshot, &entry); res; res = Process32Next(snapshot, &entry))

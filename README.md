@@ -8,7 +8,7 @@ Manipulates manufacturer OpCode 0xEF (removes Out of Range notification from scr
 ## Launch parameters
 3 parameters going in sequence (you can create a shortcut to `OorBuster.exe` and add these in _Target_ field):
 ```
-<OOR delay> <Pic delay> <Wake delay>
+<OOR delay> <Pic delay value to be summed with OOR delay> <Wake delay>
 ```
 - OOR delay - after something changes with the screen (refresh rate, fullscreen exclusive, etc.), wait this long before removing Out of Range notification;
 - Pic delay - after OOR removal, wait this long before fixing black screen (not all monitors get black screen);
@@ -32,8 +32,8 @@ Put the .exe (or shortcut if using custom launch parameters) into
 * Changed the icon 
 
 ### Status
-| XL2411P FW Version | Fixes black screen | Removes OOR notification |
-|:-------------------|:-------------------|:-------------------------|
-| V9                 |✅                  |❌                       |
-| V10                |❔                  |❔                       |
-| V13                |❔                  |❔                       |
+| XL2411P FW Version | FW Binaries ([confirmed working](https://youtu.be/44rDRHatMKI?si=d5ABKtteKY3Da8i4))           | The app fixes black screen | The app removes OOR notification |
+|:-------------------|:----------------------------------------------------------------------------------------------|:---------------------------|:---------------------------------|
+| V9                 |[Download](https://github.com/Maxinator500/OOR-Buster-XL2411P-special/blob/FW/XL2411P-FW09.bin)|✅                          |❌                       |
+| V10                |[Download](https://github.com/Maxinator500/OOR-Buster-XL2411P-special/blob/FW/XL2411P-FW10.bin)|✅                          |❌                       |
+| V13                |❔                                                                                             |❔                           |❔                        |

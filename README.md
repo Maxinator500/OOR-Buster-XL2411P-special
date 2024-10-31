@@ -5,6 +5,9 @@ Since FW version ~9 the ususal OpCodes 0xCC and 0xDC are no longer effective aft
 ## Details
 Manipulates manufacturer OpCode 0xEF (removes Out of Range notification from screen) and Overscan Mode 0xDA (fixes black screen) after hitting over 144Hz on your BenQ 144Hz monitor. The OpCodes are cached upon launching the app, so if you changed Overscan Mode while the app is running (e.g. from Normal to Overscan) and wish to use it, before switching to overclocked refresh rate right click the OOR Buster icon in tray and hit reload.
 
+## Alternative versions
+Releases from other branches:<br/>FW-V03 - [Nov 1, 2024 release](https://github.com/Maxinator500/OOR-Buster-XL2411P-special/releases/tag/1.4-branchV03)
+
 ## Launch parameters
 3 parameters going in sequence (you can create a shortcut to `OorBuster.exe` and add these in _Target_ field):
 ```
@@ -32,8 +35,11 @@ Put the .exe (or shortcut if using custom launch parameters) into
 * Changed the icon 
 
 ### Status
-| XL2411P FW Version | FW Binaries ([confirmed working](https://youtu.be/44rDRHatMKI?si=d5ABKtteKY3Da8i4))           | The app fixes black screen | The app removes OOR notification |
-|:-------------------|:----------------------------------------------------------------------------------------------|:---------------------------|:---------------------------------|
-| V9                 |[Download](https://github.com/Maxinator500/OOR-Buster-XL2411P-special/blob/FW/XL2411P-FW09.bin)|✅                          |❌                       |
-| V10                |[Download](https://github.com/Maxinator500/OOR-Buster-XL2411P-special/blob/FW/XL2411P-FW10.bin)|✅                          |❌                       |
-| V13                |❔                                                                                             |❔                           |❔                        |
+| XL2411P FW Version | FW Binaries ([confirmed working](https://youtu.be/44rDRHatMKI?si=d5ABKtteKY3Da8i4))           | The app fixes black screen                 | The app removes OOR notification          |
+|:-------------------|:----------------------------------------------------------------------------------------------|:-------------------------------------------|:------------------------------------------|
+| V02                |❔                                                                                             |❔                                          |❔                                          |
+| V03                |[Download](https://github.com/Maxinator500/OOR-Buster-XL2411P-special/blob/FW/XL2411P-FW03.bin)|⚠️ It does,<br/> use `alternative version` |⚠️ It does,<br/> use `alternative version` |
+| V06                |❔                                                                                             |❔                                          |❔                                          |
+| V09                |[Download](https://github.com/Maxinator500/OOR-Buster-XL2411P-special/blob/FW/XL2411P-FW09.bin)|✅                                         |❌                                         |
+| V10                |[Download](https://github.com/Maxinator500/OOR-Buster-XL2411P-special/blob/FW/XL2411P-FW10.bin)|✅                                         |❌                                         |
+| V13                |❔                                                                                             |❔                                          |❔                                          |

@@ -6,23 +6,23 @@
 #include <Tlhelp32.h>
 #include "resource.h"
 
-const BYTE VCP_SPECIFIC_ONE = 0xEF;	//Manufacturer specific OpCode
+const BYTE VCP_LANGUAGE = 0xCC;			//Language OpCode
 const BYTE VCP_OVERSCAN_MODE = 0xDA;	//Overscan setting OpCode
 
 enum
 {
-	WM_APP_RELOAD = WM_APP + 1,	//WM_APP_RELOAD refreshes cached OpCode values
+	WM_APP_RELOAD = WM_APP + 1,			//WM_APP_RELOAD refreshes cached OpCode values
 	WM_APP_NEXT_MODE,
 	WM_APP_PREV_MODE,
 	WM_APP_REMOVE_OOR_MSG,
 	WM_APP_EXIT
 };
 
-DWORD PreferredSpecific = 0;	//Unknown (default)
-DWORD PreferredOverscanMode = 0;//Normal (default)
+DWORD PreferredLanguage = 2;			//English
+DWORD PreferredOverscanMode = 0;		//Normal (default)
 
-DWORD OorDelay = 2000;	//Values for delays if not specified by args
-DWORD PicDelay = 500;
+DWORD OorDelay = 5000;					//Values for delays if not specified by args
+DWORD PicDelay = 2000;
 DWORD WakeDelay = 3000;
 
 NOTIFYICONDATA TrayIcon;
@@ -58,7 +58,7 @@ void CachePhysicalMonitor()
 
 void CacheVcpValues()
 {
-	GetVCPFeatureAndVCPFeatureReply(MonitorHandle, VCP_SPECIFIC_ONE, NULL, &PreferredSpecific, NULL);
+	GetVCPFeatureAndVCPFeatureReply(MonitorHandle, VCP_LANGUAGE, NULL, &PreferredLanguage, NULL);
 	GetVCPFeatureAndVCPFeatureReply(MonitorHandle, VCP_OVERSCAN_MODE, NULL, &PreferredOverscanMode, NULL);
 }
 
@@ -69,22 +69,22 @@ void ReadLaunchParams()
 
 	if (args && argCount > 1)
 	{
-		OorDelay = (DWORD)wcstod(args[1], 0);
-		PicDelay = (DWORD)wcstod(args[2], 0);
+		PicDelay = (DWORD)wcstod(args[1], 0);
+		OorDelay = (DWORD)wcstod(args[2], 0);
 		WakeDelay = (DWORD)wcstod(args[3], 0);
 	}
 }
 
-inline void FixOor() {SetVCPFeature(MonitorHandle, VCP_SPECIFIC_ONE, PreferredSpecific);}	//Removes "Out of Range" error from screen
+inline void FixOor() {SetVCPFeature(MonitorHandle, VCP_LANGUAGE, PreferredLanguage);}			//Removes "Out of Range" error from screen
 inline void FixPic() {SetVCPFeature(MonitorHandle, VCP_OVERSCAN_MODE, PreferredOverscanMode);}	//Fixes black screen
 
 void AttemptFixOor()
 {
 	CachePhysicalMonitor();
 	CacheVcpValues();
-	PreferredSpecific++;
+	PreferredLanguage++;
 	FixOor();
-	PreferredSpecific--;
+	PreferredLanguage--;
 	FixOor();
 }
 
@@ -112,8 +112,8 @@ void ApplyVcpValues(bool wake = false)
 	if (wake)
 		Sleep(WakeDelay);
 
-	Sleep(OorDelay); FixOor();
 	Sleep(PicDelay); FixPic();
+	Sleep(OorDelay); FixOor();
 }
 
 void ShowTrayMenu(HWND wnd)

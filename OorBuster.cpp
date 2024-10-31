@@ -7,7 +7,7 @@
 #include "resource.h"
 
 const BYTE VCP_SPECIFIC_ONE = 0xEF;	//Manufacturer specific OpCode
-const BYTE VCP_OVERSCAN_MODE = 0xDA;//Overscan setting OpCode
+const BYTE VCP_OVERSCAN_MODE = 0xDA;	//Overscan setting OpCode
 
 enum
 {
@@ -83,6 +83,8 @@ void AttemptFixOor()
 	CachePhysicalMonitor();
 	CacheVcpValues();
 	PreferredSpecific++;
+	FixOor();
+	PreferredSpecific--;
 	FixOor();
 }
 

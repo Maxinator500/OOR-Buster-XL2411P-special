@@ -26,11 +26,12 @@ Put the .exe (or shortcut if using custom launch parameters) into
 * Changed the icon 
 
 ### Status
-| XL2411P FW Version | FW Binaries ([confirmed working](https://youtu.be/44rDRHatMKI?si=d5ABKtteKY3Da8i4))              | The app fixes black screen                 | The app removes OOR notification          |
+| XL2411P FW Version | FW Binaries (confirmed working)              | The app fixes black screen                 | The app removes OOR notification          |
 |:-------------------|:-------------------------------------------------------------------------------------------------|:-------------------------------------------|:------------------------------------------|
 | V02                |❔                                                                                                |❔                                          |❔                                          |
 | V03                |[Download](https://github.com/Maxinator500/OOR-Buster-XL2411P-special/blob/files/XL2411P-FW03.bin)|✅                                         |✅                                         |
 | V06                |❔                                                                                                |❔                                          |❔                                          |
 | V09                |[Download](https://github.com/Maxinator500/OOR-Buster-XL2411P-special/blob/files/XL2411P-FW09.bin)|✅                                         |❌                                         |
 | V10                |[Download](https://github.com/Maxinator500/OOR-Buster-XL2411P-special/blob/files/XL2411P-FW10.bin)|✅                                         |❌                                         |
+| V11                |[Download](https://github.com/Maxinator500/OOR-Buster-XL2411P-special/blob/files/XL2411P-FW11.bin)|✅                                         |❌                                         |
 | V13                |[Download](https://github.com/Maxinator500/OOR-Buster-XL2411P-special/blob/files/XL2411P-FW13.bin)|✅                                         |❌                                         |
